@@ -1,0 +1,30 @@
+header{
+        /* height: 25%; */
+        padding: 10px;
+        background-color: white;
+        /* box-shadow: none; */
+        box-shadow: #ccc 0 6px 12px 0;
+}
+agm-map { height:600px; /* height is required */ }
+.my-class{
+        background-color:red;
+}
+.basic{
+       
+        margin: 0;
+    padding: 8px;
+    list-style-type: none;
+    /* display: block; */
+    overflow: hidden;
+    border-bottom: 2px solid #ebebeb;
+    cursor: pointer
+}
+.scroll{
+        height:600px;
+        overflow-y:scroll;
+        background-color: floralwhite;
+        border-top: 3px solid #dee2e6 !important;
+}
+.pointer{
+        cursor:pointer;
+}

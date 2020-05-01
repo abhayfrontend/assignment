@@ -2,7 +2,7 @@
 <header>
     <div class="row">
         <div class="col pointer" (click)="filterTrucks(data)">
-    <strong>Total Trucks<br>{{data?.length}}</strong>
+    <strong>Total Trucks<br>{{trucks?.total?.length}}</strong>
         </div>
         <div class="col pointer" (click)="filterTrucks(trucks.running)">
     <strong>Running Trucks <br>{{trucks?.running?.length}}   </strong>     
@@ -20,10 +20,12 @@
             <ng-multiselect-dropdown
             [placeholder]="'Select truck'"
             [data]="dropdownList"
+            (onDropDownClose)="onDropDownClose()"
             [(ngModel)]="selectedItems"
             [settings]="dropdownSettings"
             (onSelect)="onItemSelect($event)"
             (onSelectAll)="onSelectAll($event)"
+            
           >
           </ng-multiselect-dropdown>
         </div>
@@ -70,12 +72,16 @@
           (mapClick)="addMarker($event.coords.lat, $event.coords.lng)"
         >
           <agm-marker
-            *ngFor="let marker of markers"
+            *ngFor="let marker of markers;let i=index"
             [latitude]="marker.lat"
             [longitude]="marker.lng"
             [opacity]="marker.alpha"
+            [iconUrl]="marker.icon"
             [markerDraggable]="true"
             (markerClick)="selectMarker($event)"
+           
+   
+ 
           >
           </agm-marker>
         

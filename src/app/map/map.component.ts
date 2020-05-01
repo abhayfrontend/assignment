@@ -10,16 +10,21 @@ import { IDropdownSettings } from 'ng-multiselect-dropdown';
 export class MapComponent implements OnInit {
 data:any;
 dropdownList=[];
+dropdownmap=new Map<object, string>(); 
 now=Date.now();
 selectedItems = [];
 dropdownSettings:any={};
 copyfiltertrucks;
+color:'#ffffff';
 trucks={
+  'total':[],
   'idle':[],
   'stopped':[],
   'error':[],
   'running':[]
 }
+
+
 lat = 43.879078;
 lng = -103.4615581;
 filteredTrucks:any;
@@ -49,43 +54,86 @@ markers = [
     this.getData();
   }
   onItemSelect(item: any) {
-    console.log(item);
+    this.emptyTrucks();
+   let x=[];
+    for(var i=0;i<this.selectedItems.length;i++){
+      x.push(this.dropdownmap.get(this.selectedItems[i].item_id));
+    }
+    this.calculateTrucks(x);
+    this.filterTrucks(x);
+  }
+  emptyTrucks(){
+    this.trucks={
+      'total':[],
+      'idle':[],
+      'stopped':[],
+      'error':[],
+      'running':[]
+    }
+  }
+  onDropDownClose(){
+    this.emptyTrucks();
+    let x=[];
+    for(var i=0;i<this.selectedItems.length;i++){
+      x.push(this.dropdownmap.get(this.selectedItems[i].item_id));
+    }
+    this.calculateTrucks(x);
+    this.filterTrucks(x);
   }
   onSelectAll(items: any) {
-    console.log(items);
+    this.emptyTrucks();
+    this.calculateTrucks(this.data);
+    this.filterTrucks(this.data);
   }
 getData(){
   this.mapService.getMapData().subscribe(res=>{
  let a:any;
  a=res;
 this.data=a.data;
+this.setGraphData(a.data);
 this.calculateTrucks(a.data);
 this.filterTrucks(this.data);
 
   },err=>{});
 }
-
+setGraphData(a){
+  let x=[];
+  for(var i=0;i<a.length;i++){
+    x.push({ item_id: a[i].id, item_text: a[i].truckNumber });
+    this.dropdownmap.set(a[i].id, a[i]);
+  }
+  
+  this.dropdownList=x;
+  this.selectedItems=x;
+}
 calculateTrucks(a){
   var ts=Date.now()
   let x=[];
  for(var i=0;i<a.length;i++){
+   
    if(a[i].lastRunningState.truckRunningState==0){
+  
+   
     this.trucks.stopped.push(a[i]);
    }
    if(a[i].lastRunningState.truckRunningState==1){
+    
+    
     this.trucks.running.push(a[i]);
     
    }
    if(a[i].lastWaypoint.ignitionOn==true){
+    
+    
     this.trucks.idle.push(a[i]);
    }
    if(a[i].lastRunningState.stopStartTime<ts-14400000){
+    
     this.trucks.error.push(a[i]);
    }
+   this.trucks.total.push(a[i]);
   
-     x.push({ item_id: a[i].id, item_text: a[i].truckNumber });
-   
-this.dropdownList=x;
+
  }
 
 }
@@ -110,15 +158,80 @@ selectMarker(event) {
 calculateMarker(x){
   let y=[];
   for(var i=0;i<x.length;i++){
-  y.push({ lat: x[i].lastRunningState.lat, lng: x[i].lastRunningState.lng, alpha: 1 });
+  y.push({ lat: x[i].lastRunningState.lat, lng: x[i].lastRunningState.lng, alpha: 1,icon:x[i].icon });
 
   }
   this.markers=y;
+
 }
 filterTrucks(trucks){
-  debugger;
+
+
+var ts=Date.now()
+let x=[];
+for(var i=0;i<trucks.length;i++){
+ 
+ if(trucks[i].lastRunningState.truckRunningState==0){
+console.log('1')
+  
+ let iconUrl = {
+  
+    url:'https://image.flaticon.com/icons/svg/565/565391.svg',
+      scaledSize: {
+          width: 40,
+          height: 40
+      }
+  }
+  trucks[i]['icon']=iconUrl;
+ 
+ }
+ if(trucks[i].lastRunningState.truckRunningState==1){
+  let iconUrl = {
+  
+    url:'https://image.flaticon.com/icons/svg/411/411712.svg',
+      scaledSize: {
+          width: 40,
+          height: 40
+      }
+  }
+  
+  trucks[i]['icon']=iconUrl;
+  
+  
+ }
+ if(trucks[i].lastWaypoint.ignitionOn==true){
+  let iconUrl = {
+  
+    url:'https://www.flaticon.com/premium-icon/icons/svg/2874/2874879.svg',
+      scaledSize: {
+          width: 40,
+          height: 40
+      }
+  }
+ 
+  trucks[i]['icon']=iconUrl;
+ 
+ }
+ if(trucks[i].lastRunningState.stopStartTime<ts-14400000){
+  let iconUrl = {
+  
+    url:'https://t3.ftcdn.net/jpg/01/52/49/90/240_F_152499010_GguXZpoX8iKBnQi2xCFbMaI0cuXVgP0m.jpg',
+      scaledSize: {
+          width: 40,
+          height: 40
+      }
+  }
+  
+  trucks[i]['icon']=iconUrl;
+  
+ }
+}
+for(var i=0;i<trucks.length;i++){
+  console.log(trucks[i].icon)
+}
 this.filteredTrucks=trucks;
 this.copyfiltertrucks=this.filteredTrucks;
+
 this.calculateMarker(this.filteredTrucks);
 }
 filterItem(value) {
